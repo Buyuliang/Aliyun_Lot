@@ -5,15 +5,17 @@
 #include "Tone32.h"
 #include "music_joy.h"
 
-uint8_t time_data = 0;
 uint8_t temp_val,hum_val;
 hw_timer_t *timer = NULL;
 //static void IRAM_ATTR Timer0_CallBack(void);
 
 #define SPEARKER_PIN  A4
 /*配置WIFI名和密码*/
-const char * WIFI_SSID     = "note10";
-const char * WIFI_PASSWORD = "1234567890";
+//const char * WIFI_SSID     = "note10";
+//const char * WIFI_PASSWORD = "1234567890";
+
+const char * WIFI_SSID     = "emakefun";
+const char * WIFI_PASSWORD = "501416wf";
 
 /*配置设备证书信息*/
 String ProductKey = "a1e8bfTKTge";
@@ -80,9 +82,7 @@ void connectWiFi(){
   Serial.print("IP Adderss: ");
   Serial.println(WiFi.localIP());
 }
-char tt[300],locatal_temp;
-uint8_t buff_temp[10];
-uint8_t buff_hum[10];
+
 void callback(char * topic, byte * payload, unsigned int len){
   Serial.print("Recevice [");
   Serial.print(topic);
@@ -90,45 +90,18 @@ void callback(char * topic, byte * payload, unsigned int len){
   for (int i = 0; i < len; i++){
     Serial.print((char)payload[i]);
   }
-  int k = 0, x = 0, j = 0, y = 0;
-  while(payload[k] != '\0')
-  {
-    if(payload[k] == 't' || payload[k+1] == 'e'|| payload[k+2] == 'm' || payload[k+3] == 'p')
-    {
-        break;
-      }
-    }
-    while(payload[j] != '\0')
-  {
-    if(payload[j] == 'h' || payload[j+1] == 'u'|| payload[j+2] == 'm')
-    {
-        break;
-      }
-    }
-   
-   while(payload[k+7] != '\"')
-   {  buff_temp[x++] = payload[(k+7)+1];
-      k++;
-    } 
-   buff_temp[x++] = '\0';
-   while(payload[j+11] != '\"')
-   {  buff_hum = payload[(j+7)+1];
-      temp_val = (payload[(j+7)+1] - '0') * 10+ temp_val
-      temp_val = (payload[(j+7)+1] - '0') * 10+ temp_val
-      j++;
-    } 
-    buff_hum[y++] = '\0';
-//  StaticJsonBuffer<300> jsonBuffer;
-//  JsonObject& root = jsonBuffer.parseObject((const char*)payload);
-//  if(!root.success()){
-//    Serial.println("parseObject() failed");
-//    return;
-//  }
-//  playWitchOne = root["params"][Identifier];
-//  Serial.print("playWitchOne=");
-//  Serial.println(playWitchOne);
-Serial.print(buff_temp);
-Serial.print(buff_hum);
+  Serial.println();
+  StaticJsonBuffer<0x7ff> jsonBuffer;
+  JsonObject& root = jsonBuffer.parseObject((const char*)payload);
+  if(!root.success()){
+    Serial.println("parseObject() failed");
+    return ;
+  }
+  temp_val = root["params"]["mymusic"]["condition"]["temp"];
+  hum_val = root["params"]["mymusic"]["condition"]["humidity"];
+  Serial.print("playWitchOne=");
+  Serial.println(temp_val);
+  Serial.println(hum_val);
   
   beginPlay = 1;
 }
@@ -184,4 +157,3 @@ void loop(){
   }
   client.loop();
 }
-
